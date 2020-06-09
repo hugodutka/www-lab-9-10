@@ -6,12 +6,17 @@ html
   body
     div
       h2
-        a(href="meme/" + meme.id) #{meme.name}
+        a(href="/meme/" + meme.id) #{meme.name}
       div=`Price: ${meme.price}`
+      form(method="POST")
+        div.form-group
+          label(for="price") Change the price:
+          input#price.form-control(type="text" name="price")
+        button.btn.btn-primary(type="submit") Submit
+      h2="Price history"
       br
       img(class="meme-img" src=meme.url)
-      h2="Price history"
       ul
-        each price in meme.price_history.reverse()
+        each price in meme.price_history
           li
             span #{price}

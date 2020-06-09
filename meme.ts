@@ -12,7 +12,7 @@ export class Meme {
 
   change_price(price: number): void {
     this.price = price;
-    this.price_history.push(price);
+    this.price_history.unshift(price);
   }
 }
 

@@ -6,6 +6,12 @@ const port = 8080;
 
 app.set("view engine", "pug");
 
+app.use(
+  express.urlencoded({
+    extended: true,
+  })
+);
+
 const most_expensive = [
   {
     id: 10,
@@ -56,6 +62,14 @@ app.get("/meme/:memeId", function (req, res) {
   } else {
     res.render("meme-not-found");
   }
+});
+
+app.post("/meme/:memeId", function (req, res) {
+  let meme = auction.get_meme(Number(req.params.memeId));
+  let price = Number(req.body.price);
+  meme.change_price(price);
+  console.log(req.body.price);
+  res.render("meme", { meme: meme });
 });
 
 app.listen(port, () =>
