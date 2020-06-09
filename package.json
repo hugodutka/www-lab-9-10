@@ -1,0 +1,20 @@
+{
+  "name": "9-10",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "build": "tsc --target es2015 program.ts",
+  "dependencies": {
+    "express": "^4.17.1",
+    "typescript": "^3.9.5"
+  },
+  "devDependencies": {
+    "@types/node": "^14.0.12",
+    "ts-node": "^8.10.2"
+  }
+}
