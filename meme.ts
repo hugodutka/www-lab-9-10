@@ -11,8 +11,8 @@ export class Meme {
   ) {}
 
   change_price(price: number): void {
-    this.price_history.push(this.price);
     this.price = price;
+    this.price_history.push(price);
   }
 }
 

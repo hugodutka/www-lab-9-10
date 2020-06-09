@@ -1,0 +1,17 @@
+html
+  head
+    title= title
+  style
+    include style.css
+  body
+    div
+      h2
+        a(href="meme/" + meme.id) #{meme.name}
+      div=`Price: ${meme.price}`
+      br
+      img(class="meme-img" src=meme.url)
+      h2="Price history"
+      ul
+        each price in meme.price_history.reverse()
+          li
+            span #{price}
