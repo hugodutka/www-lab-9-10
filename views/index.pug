@@ -6,9 +6,16 @@ html
   body
     h1= message
     img(src="http://www.mimuw.edu.pl/")
+    div
+      a(href="meme/" + top_meme.id) #{top_meme.name}
+      div=`Price: ${top_meme.price}`
+      br
+      img(class="meme-img" src=top_meme.url)
     h1="Meme list"
-    ul
+    ul(class="meme-list")
       each meme in memes
-        li
+        li(class="meme")
           a(href="meme/" + meme.id) #{meme.name}
-          img(src=meme.url)
+          div=`Price: ${meme.price}`
+          br
+          img(class="meme-img" src=meme.url)

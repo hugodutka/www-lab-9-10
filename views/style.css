@@ -1,0 +1,7 @@
+.meme-img {
+  max-width: 250px;
+}
+
+.meme-list > * + * {
+  margin-top: 1rem;
+}

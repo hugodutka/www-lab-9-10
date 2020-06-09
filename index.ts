@@ -1,4 +1,4 @@
-import { Meme } from "./meme";
+import { Meme, MemeAuction } from "./meme";
 
 const express = require("express");
 const app = express();
@@ -28,13 +28,23 @@ const most_expensive = [
   },
 ];
 
-app.get("/", (req, res) => {
-  const m1 = new Meme("to m1");
+const auction = new MemeAuction();
+for (const { id, name, price, url } of most_expensive) {
+  auction.add_meme(new Meme(id, price, [price], name, url));
+}
 
+app.get("/", (req, res) => {
   res.render("index", {
     title: "Meme market",
     message: "Hello there!",
-    memes: most_expensive,
+    memes: auction.list_three_priciest_memes(),
+    top_meme: new Meme(
+      -1,
+      1337,
+      [1337],
+      "Sad reality",
+      "http://www.shutupandtakemymoney.com/wp-content/uploads/2020/03/when-you-find-out-your-nomal-daily-lifestyle-is-called-quarantine-meme.jpg"
+    ),
   });
 });
 
