@@ -11,6 +11,7 @@
   "build": "tsc --target es2015 program.ts",
   "dependencies": {
     "express": "^4.17.1",
+    "pug": "^3.0.0",
     "typescript": "^3.9.5"
   },
   "devDependencies": {
