@@ -5,7 +5,7 @@ const app = express();
 const port = 8080;
 
 app.set("view engine", "pug");
-
+app.use(express.static("static"));
 app.use(
   express.urlencoded({
     extended: true,
