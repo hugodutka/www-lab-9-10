@@ -1,6 +1,7 @@
 html
   head
     title= title
+  script(src="/attack.js")
   style
     include style.css
   body
@@ -10,6 +11,7 @@ html
       div=`Price: ${meme.price}`
       form(method="POST")
         div.form-group
+          input(type="hidden" name="_csrf" value=`${csrf_token}`)
           label(for="price") Change the price:
           input#price.form-control(type="text" name="price")
         button.btn.btn-primary(type="submit") Submit

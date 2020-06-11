@@ -1,9 +1,15 @@
 import { Meme, MemeAuction } from "./meme";
 
+const cookie_parser = require("cookie-parser");
+const csrf = require("csurf");
+const body_parser = require("body-parser");
 const express = require("express");
 const app = express();
 const port = 8080;
 
+app.use(body_parser.urlencoded({ extended: false }));
+app.use(cookie_parser());
+app.use(csrf({ cookie: true }));
 app.set("view engine", "pug");
 app.use(express.static("static"));
 app.use(
@@ -55,21 +61,21 @@ app.get("/", (req, res) => {
   });
 });
 
-app.get("/meme/:memeId", function (req, res) {
+app.get("/meme/:memeId", (req, res) => {
   let meme = auction.get_meme(Number(req.params.memeId));
   if (meme !== null) {
-    res.render("meme", { meme: meme });
+    res.render("meme", { meme: meme, csrf_token: req.csrfToken() });
   } else {
     res.render("meme-not-found");
   }
 });
 
-app.post("/meme/:memeId", function (req, res) {
+app.post("/meme/:memeId", (req, res) => {
   let meme = auction.get_meme(Number(req.params.memeId));
   let price = Number(req.body.price);
   meme.change_price(price);
   console.log(req.body.price);
-  res.render("meme", { meme: meme });
+  res.render("meme", { meme: meme, csrf_token: req.csrfToken() });
 });
 
 app.listen(port, () =>
