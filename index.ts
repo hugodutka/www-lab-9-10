@@ -1,4 +1,5 @@
-import { Meme, MemeAuction } from "./meme";
+import { Meme } from "./meme";
+import { new_db, setup_db } from "./db";
 
 const cookie_parser = require("cookie-parser");
 const csrf = require("csurf");
@@ -17,52 +18,24 @@ app.use(
     extended: true,
   })
 );
+app.use((_req, res, next) => {
+  res.locals.db = new_db();
+  next();
+});
 
-const most_expensive = [
-  {
-    id: 10,
-    name: "Gold",
-    price: 10000,
-    url: "https://i.redd.it/h7rplf9jt8y21.png",
-  },
-  {
-    id: 9,
-    name: "Platinum",
-    price: 11000,
-    url:
-      "http://www.quickmeme.com/img/90/90d3d6f6d527a64001b79f4e13bc61912842d4a5876d17c1f011ee519d69b469.jpg",
-  },
-  {
-    id: 8,
-    name: "Elite",
-    price: 12000,
-    url: "https://i.imgflip.com/30zz5g.jpg",
-  },
-  {
-    id: 69,
-    name: "Sad reality",
-    price: 1337,
-    url:
-      "http://www.shutupandtakemymoney.com/wp-content/uploads/2020/03/when-you-find-out-your-nomal-daily-lifestyle-is-called-quarantine-meme.jpg",
-  },
-];
-
-const auction = new MemeAuction();
-for (const { id, name, price, url } of most_expensive) {
-  auction.add_meme(new Meme(id, price, [price], name, url));
-}
-
-app.get("/", (req, res) => {
+app.get("/", async (_req, res) => {
+  const memes = Meme.fetch_many_sorted_by_price(res.locals.db, 3);
+  const top_meme = Meme.fetch(res.locals.db, 4);
   res.render("index", {
     title: "Meme market",
     message: "Hello there!",
-    memes: auction.list_three_priciest_memes(),
-    top_meme: auction.get_meme(69),
+    memes: await memes,
+    top_meme: await top_meme,
   });
 });
 
-app.get("/meme/:memeId", (req, res) => {
-  let meme = auction.get_meme(Number(req.params.memeId));
+app.get("/meme/:memeId", async (req, res) => {
+  let meme = await Meme.fetch(res.locals.db, Number(req.params.memeId));
   if (meme !== null) {
     res.render("meme", { meme: meme, csrf_token: req.csrfToken() });
   } else {
@@ -70,14 +43,23 @@ app.get("/meme/:memeId", (req, res) => {
   }
 });
 
-app.post("/meme/:memeId", (req, res) => {
-  let meme = auction.get_meme(Number(req.params.memeId));
+app.post("/meme/:memeId", async (req, res) => {
+  let meme = await Meme.fetch(res.locals.db, Number(req.params.memeId));
   let price = Number(req.body.price);
-  meme.change_price(price);
+  await meme.change_price(res.locals.db, price);
   console.log(req.body.price);
   res.render("meme", { meme: meme, csrf_token: req.csrfToken() });
 });
 
-app.listen(port, () =>
-  console.log(`Server listening at http://localhost:${port}`)
-);
+app.listen(port, async () => {
+  console.log("starting");
+  const db = new_db();
+  try {
+    await setup_db(db);
+  } catch (err) {
+    console.log(err);
+    console.log("quitting");
+    process.exit(1);
+  }
+  console.log(`Server listening at http://localhost:${port}`);
+});

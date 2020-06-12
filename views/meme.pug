@@ -1,7 +1,6 @@
 html
   head
     title= title
-  script(src="/attack.js")
   style
     include style.css
   body
@@ -15,9 +14,9 @@ html
           label(for="price") Change the price:
           input#price.form-control(type="text" name="price")
         button.btn.btn-primary(type="submit") Submit
-      h2="Price history"
-      br
       img(class="meme-img" src=meme.url)
+      br
+      h2="Price history"
       ul
         each price in meme.price_history
           li
