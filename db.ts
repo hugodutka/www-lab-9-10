@@ -13,6 +13,9 @@ export const setup_db = async (db) => {
     DROP TABLE IF EXISTS meme;
   `);
   await run(db)(`
+    DROP TABLE IF EXISTS user;
+  `);
+  await run(db)(`
     DROP TABLE IF EXISTS meme_price;
   `);
   await run(db)(`
@@ -27,13 +30,22 @@ export const setup_db = async (db) => {
     );
   `);
   await run(db)(`
+    CREATE TABLE IF NOT EXISTS user (
+      id integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+      username text NOT NULL UNIQUE,
+      password text NOT NULL
+    );
+  `);
+  await run(db)(`
     CREATE TABLE IF NOT EXISTS meme_price (
       id integer NOT NULL PRIMARY KEY AUTOINCREMENT,
       meme_id integer NOT NULL,
       price double NOT NULL,
+      user_id integer NOT NULL,
       inserted_at date NOT NULL,
 
-      FOREIGN KEY (meme_id) REFERENCES meme(id)
+      FOREIGN KEY (meme_id) REFERENCES meme(id),
+      FOREIGN KEY (user_id) REFERENCES user(id)
     );
   `);
   await run(db)(`
@@ -65,6 +77,14 @@ export const setup_db = async (db) => {
       'http://www.shutupandtakemymoney.com/wp-content/uploads/2020/03/when-you-find-out-your-nomal-daily-lifestyle-is-called-quarantine-meme.jpg',
       1337
     );
+  `);
+  await run(db)(`
+    INSERT INTO user (username, password)
+    VALUES ('hugo', '123');
+  `);
+  await run(db)(`
+    INSERT INTO user (username, password)
+    VALUES ('admin', '321');
   `);
   await run(db)("COMMIT TRANSACTION;");
 };

@@ -1,2 +1,12 @@
 div
+  h3
+    a(href="/") Meme list
+    if user
+      p Logged in as: #{user.username}
+      form(method="post" action="/logout" class="inline")
+        input(type="hidden" name="_csrf" value=`${csrf_token}`)
+        button(type="submit") Log out
+    else
+      p
+        a(href="/login") Login
   h3 #{views} page views in this session

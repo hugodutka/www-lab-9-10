@@ -1,4 +1,5 @@
 import { Meme } from "./meme";
+import { User } from "./user";
 import { new_db, setup_db } from "./db";
 import store from "./session";
 
@@ -35,24 +36,35 @@ app.use(
     store: new DBStore({ db: new_db() }),
   })
 );
-app.use((req, _res, next) => {
+app.use((req, res, next) => {
   if (req.session.views) {
     req.session.views++;
   } else {
     req.session.views = 1;
   }
+  res.locals.views = req.session.views;
+  next();
+});
+app.use(async (req, res, next) => {
+  res.locals.csrf_token = req.csrfToken();
+  next();
+});
+app.use(async (req, res, next) => {
+  if (req.session.user_id) {
+    res.locals.user = await User.get_by_id(res.locals.db, req.session.user_id);
+  }
   next();
 });
 
-app.get("/", async (req, res) => {
+app.get("/", async (_req, res) => {
   const memes = Meme.fetch_many_sorted_by_price(res.locals.db, 3);
   const top_meme = Meme.fetch(res.locals.db, 4);
   res.render("index", {
+    ...res.locals,
     title: "Meme market",
     message: "Hello there!",
     memes: await memes,
     top_meme: await top_meme,
-    views: req.session.views,
   });
 });
 
@@ -60,27 +72,59 @@ app.get("/meme/:memeId", async (req, res) => {
   let meme = await Meme.fetch(res.locals.db, Number(req.params.memeId));
   if (meme !== null) {
     res.render("meme", {
+      ...res.locals,
       meme: meme,
-      csrf_token: req.csrfToken(),
-      views: req.session.views,
     });
   } else {
-    res.render("meme-not-found", {
-      views: req.session.views,
-    });
+    res.render("meme-not-found", res.locals);
   }
 });
 
 app.post("/meme/:memeId", async (req, res) => {
+  if (!res.locals.user) {
+    res.redirect("/login");
+    return;
+  }
   let meme = await Meme.fetch(res.locals.db, Number(req.params.memeId));
   let price = Number(req.body.price);
-  await meme.change_price(res.locals.db, price);
+  await meme.change_price(res.locals.db, res.locals.user.id, price);
   console.log(req.body.price);
   res.render("meme", {
+    ...res.locals,
     meme: meme,
-    csrf_token: req.csrfToken(),
-    views: req.session.views,
   });
+});
+
+app.get("/login", async (_req, res) => {
+  res.render("login", {
+    ...res.locals,
+    login_failure: false,
+  });
+});
+
+app.post("/login", async (req, res) => {
+  const username = req.body.username;
+  const password = req.body.password;
+  var user;
+  if (!username || !password) {
+    user = null;
+  } else {
+    user = await User.get_by_username(res.locals.db, req.body.username);
+  }
+  if (user && user.password === password) {
+    req.session.user_id = user.id;
+    res.redirect("/");
+  } else {
+    res.render("login", {
+      ...res.locals,
+      login_failure: true,
+    });
+  }
+});
+
+app.post("/logout", async (req, res) => {
+  req.session.user_id = null;
+  res.redirect("/");
 });
 
 app.listen(port, async () => {

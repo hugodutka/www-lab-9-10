@@ -11,11 +11,12 @@ export class Meme {
     public url: string
   ) {}
 
-  async change_price(db, price: number): Promise<void> {
+  async change_price(db, user_id: number, price: number): Promise<void> {
     await run(db)("BEGIN TRANSACTION;");
     await run(db)(
-      "INSERT INTO meme_price (meme_id, price, inserted_at) VALUES (?, ?, ?)",
+      "INSERT INTO meme_price (meme_id, user_id, price, inserted_at) VALUES (?, ?, ?, ?)",
       this.id,
+      user_id,
       this.price,
       Date.now()
     );
