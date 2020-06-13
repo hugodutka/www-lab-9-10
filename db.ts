@@ -16,6 +16,9 @@ export const setup_db = async (db) => {
     DROP TABLE IF EXISTS meme_price;
   `);
   await run(db)(`
+    DROP TABLE IF EXISTS session;
+  `);
+  await run(db)(`
     CREATE TABLE IF NOT EXISTS meme (
       id integer NOT NULL PRIMARY KEY AUTOINCREMENT,
       name text NOT NULL,
@@ -31,6 +34,12 @@ export const setup_db = async (db) => {
       inserted_at date NOT NULL,
 
       FOREIGN KEY (meme_id) REFERENCES meme(id)
+    );
+  `);
+  await run(db)(`
+    CREATE TABLE IF NOT EXISTS session (
+      sid text NOT NULL PRIMARY KEY,
+      data text NOT NULL
     );
   `);
   await run(db)(`
